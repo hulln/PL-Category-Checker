@@ -95,7 +95,7 @@
       visibility: visible;
       opacity: 1;
     }
-    /* Copied indicator styling */
+    /* "Copied" indicator styling */
     #copyIndicator {
       text-align: center;
       color: #38a169;
@@ -108,8 +108,8 @@
 <body>
   <div class="container">
     <h2>Technology Category Checker</h2>
-    <label for="inputCategories"><strong>Enter Categories (comma-separated)</strong></label>
-    <textarea id="inputCategories" placeholder="e.g., Analytics, DEVOPS IT, API Management"></textarea>
+    <label for="inputCategories"><strong>Enter Categories (comma <em>or</em> semicolon separated)</strong></label>
+    <textarea id="inputCategories" placeholder="e.g., Databases; DBMS; Developer Tools"></textarea>
     <button onclick="checkCategories()">Check</button>
     
     <div class="section">
@@ -127,10 +127,12 @@
   </div>
 
   <script>
+    // URL to categories
     const categoryURL = 'https://gist.githubusercontent.com/rxever/cbca77a40359502ffb6c576c1e2d2204/raw/04607a983e9e8b6c8d9be1eb6be6fc244e8072a1/technology_categories.txt';
+    
     let normalizedMap = new Map();
 
-    // Fetch and map categories from the provided URL.
+    // Fetch and map categories from the provided URL
     fetch(categoryURL)
       .then(response => response.json())
       .then(data => {
@@ -141,35 +143,30 @@
       })
       .catch(err => alert("❌ Could not load category list: " + err));
 
+    // Parse user input by replacing semicolons with commas, then splitting on commas
+    function parseCategories(input) {
+      // Replace all semicolons with commas
+      const replaced = input.replace(/;/g, ',');
+      // Now split by commas
+      return replaced.split(',')
+        .map(c => c.trim())
+        .filter(Boolean); // remove empty results
+    }
+
     function checkCategories() {
-      const input = document.getElementById("inputCategories").value;
-      // Split input by comma to get individual entries
-      const entries = input.split(",").map(c => c.trim()).filter(Boolean);
+      const inputVal = document.getElementById("inputCategories").value;
+      const entries = parseCategories(inputVal);
 
       const found = [];
       const notFound = [];
 
+      // Case-insensitive check
       entries.forEach(entry => {
-        // Use lower case version for matching.
-        const lowerEntry = entry.toLowerCase();
-        if (normalizedMap.has(lowerEntry)) {
-          found.push(normalizedMap.get(lowerEntry));
+        const lower = entry.toLowerCase();
+        if (normalizedMap.has(lower)) {
+          found.push(normalizedMap.get(lower)); // Keep original case from the list
         } else {
-          // If the whole entry isn't found, try splitting by whitespace.
-          const tokens = lowerEntry.split(/\s+/);
-          let tokenMatched = false;
-          tokens.forEach(token => {
-            if (normalizedMap.has(token)) {
-              found.push(normalizedMap.get(token));
-              tokenMatched = true;
-            } else {
-              notFound.push(token);
-            }
-          });
-          // Optional: if no token matched, you could alternatively add the whole entry to notFound.
-          // if (!tokenMatched) {
-          //   notFound.push(entry);
-          // }
+          notFound.push(entry);
         }
       });
 
@@ -178,7 +175,7 @@
       document.getElementById("notFound").textContent = notFound.length ? notFound.join("; ") : "(none)";
     }
 
-    // Trigger search on Enter key unless Shift+Enter is used for a newline.
+    // Trigger search on Enter key unless Shift+Enter is used for a newline
     document.getElementById("inputCategories").addEventListener("keydown", function(event) {
       if (event.key === "Enter" && !event.shiftKey) {
         event.preventDefault();
@@ -186,17 +183,17 @@
       }
     });
 
-    // Copy found text to clipboard when the "Found" area is clicked.
+    // Copy found text to clipboard when the "Found" area is clicked
     document.getElementById("found").addEventListener("click", function() {
       const text = this.innerText;
       if (!text || text === "(none)") return;
 
       navigator.clipboard.writeText(text)
         .then(() => {
-          // Show tooltip indicator.
+          // Show tooltip indicator
           const tooltip = document.getElementById("tooltip");
           tooltip.classList.add("show");
-          // Show additional "Copied" indicator.
+          // Show additional "Copied" indicator
           const copyIndicator = document.getElementById("copyIndicator");
           copyIndicator.style.display = "block";
           setTimeout(() => {
