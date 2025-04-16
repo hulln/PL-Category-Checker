@@ -4,7 +4,6 @@
   <meta charset="UTF-8">
   <title>Technology Category Checker</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <!-- Google Font -->
   <link href="https://fonts.googleapis.com/css?family=Roboto:300,400,500,700&display=swap" rel="stylesheet">
   <style>
     body {
@@ -84,7 +83,7 @@
       padding: 5px;
       position: absolute;
       z-index: 1;
-      bottom: 150%; /* Position above the element */
+      bottom: 150%;
       left: 50%;
       margin-left: -40px;
       opacity: 0;
@@ -95,7 +94,6 @@
       visibility: visible;
       opacity: 1;
     }
-    /* "Copied" indicator styling */
     #copyIndicator {
       text-align: center;
       color: #38a169;
@@ -111,7 +109,7 @@
     <label for="inputCategories"><strong>Enter Categories (comma <em>or</em> semicolon separated)</strong></label>
     <textarea id="inputCategories" placeholder="e.g., Databases; DBMS; Developer Tools"></textarea>
     <button onclick="checkCategories()">Check</button>
-    
+
     <div class="section">
       <h3>✅ Found (as in official list):</h3>
       <div class="tooltip">
@@ -127,30 +125,16 @@
   </div>
 
   <script>
-    // URL to categories
-    const categoryURL = 'https://gist.githubusercontent.com/rxever/cbca77a40359502ffb6c576c1e2d2204/raw/04607a983e9e8b6c8d9be1eb6be6fc244e8072a1/technology_categories.txt';
-    
-    let normalizedMap = new Map();
+    const officialCategories = [
+      "A/B Testing", "Advanced Analytics and Data Science", "Analytics", "Business Intelligence", "Cookie Compliance", "Intelligence and Analytics", "Marketing Analytics", "Mobile Analytics", "Predictive Analytics", "Social Media Analytics and Monitoring", "System Analytics & Monitoring", "Tag Management", "Web Analytics", "API Management", "Accessibility", "Blogs", "CAPTCHA", "Cache Tools", "Caching", "Charting", "Click-to-Call", "Consent Management", "Content Management System", "Documentation Tools", "Editors", "Enterprise Content Management", "Fitness and Gym Management", "Font Scripts", "Generative AI", "Hosting Panels", "Identity Verification", "Javascript Graphics", "Javascript Libraries", "Legal Solutions", "Live Blogging", "Live Chat", "Mapping and GIS", "Maps", "Message Boards", "Miscellaneous", "Mobile Apps", "Online Community Software", "Online Form Builders", "Page Builders", "Performance", "Photo Galleries", "Push Notifications", "Real Estate Property Management", "Rich Text Editors", "Search Engines", "Site Search", "Social Login", "Social Sharing", "Spa and Salon Management", "Sports Management", "Static Site Generator", "User onboarding", "Visitor Counters", "Web & Portal Technology", "Web Fonts", "Web Frameworks", "Web Platform Extensions", "Web Tools and Plugins", "Website Builders", "Widgets", "Wikis", "WordPress Plugins", "WordPress Themes", "Account-Based Marketing", "Advocacy Marketing", "Automotive Marketing", "Call Tracking", "Content Marketing", "Customer Data Platforms", "Email Marketing", "Healthcare Marketing", "Hospitality Marketing", "Influencer Marketing Software", "Local Marketing", "Loyalty and Gamification", "Marketing", "Marketing Automation", "Marketing Data Providers", "Marketing Performance Measurement", "Online Review Management", "Personalization", "Real Estate Marketing", "Recruitment Marketing", "Referral Marketing", "Search Marketing", "Social Media Marketing Software", "Translation", "Visual and User Generated Content Marketing", "Accounting", "Accounting and Finance", "Blockchain", "Corporate Performance Management", "Cryptominers", "Governance, Risk and Compliance", "Insurance Software", "Online Banking", "Recurring Billing", "Risk and Compliance", "Travel and Expense Management"
+    ];
 
-    // Fetch and map categories from the provided URL
-    fetch(categoryURL)
-      .then(response => response.json())
-      .then(data => {
-        normalizedMap = new Map(
-          data.map(item => [item.trim().toLowerCase(), item.trim()])
-        );
-        console.log("✔️ Categories loaded.");
-      })
-      .catch(err => alert("❌ Could not load category list: " + err));
+    let normalizedMap = new Map(officialCategories.map(cat => [cat.toLowerCase(), cat]));
 
-    // Parse user input by replacing semicolons with commas, then splitting on commas
     function parseCategories(input) {
-      // Replace all semicolons with commas
-      const replaced = input.replace(/;/g, ',');
-      // Now split by commas
-      return replaced.split(',')
+      return input.replace(/;/g, ',').split(',')
         .map(c => c.trim())
-        .filter(Boolean); // remove empty results
+        .filter(Boolean);
     }
 
     function checkCategories() {
@@ -160,22 +144,19 @@
       const found = [];
       const notFound = [];
 
-      // Case-insensitive check
       entries.forEach(entry => {
-        const lower = entry.toLowerCase();
-        if (normalizedMap.has(lower)) {
-          found.push(normalizedMap.get(lower)); // Keep original case from the list
+        const key = entry.toLowerCase();
+        if (normalizedMap.has(key)) {
+          found.push(normalizedMap.get(key));
         } else {
           notFound.push(entry);
         }
       });
 
-      // Display results as semicolon-separated
       document.getElementById("found").textContent = found.length ? found.join("; ") : "(none)";
       document.getElementById("notFound").textContent = notFound.length ? notFound.join("; ") : "(none)";
     }
 
-    // Trigger search on Enter key unless Shift+Enter is used for a newline
     document.getElementById("inputCategories").addEventListener("keydown", function(event) {
       if (event.key === "Enter" && !event.shiftKey) {
         event.preventDefault();
@@ -183,17 +164,13 @@
       }
     });
 
-    // Copy found text to clipboard when the "Found" area is clicked
     document.getElementById("found").addEventListener("click", function() {
       const text = this.innerText;
       if (!text || text === "(none)") return;
-
       navigator.clipboard.writeText(text)
         .then(() => {
-          // Show tooltip indicator
           const tooltip = document.getElementById("tooltip");
           tooltip.classList.add("show");
-          // Show additional "Copied" indicator
           const copyIndicator = document.getElementById("copyIndicator");
           copyIndicator.style.display = "block";
           setTimeout(() => {
